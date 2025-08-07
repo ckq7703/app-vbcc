@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Certificate Verification App - Hệ thống Quản lý Chứng chỉ</title>
+    <meta name="description" content="Hệ thống quản lý và xác minh chứng chỉ trên blockchain" />
+    <meta name="keywords" content="blockchain, certificate, verification, chứng chỉ, xác minh" />
+    
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    
+    <style>
+      /* Critical CSS để tránh FOUC (Flash of Unstyled Content) */
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #1f2937;
+        line-height: 1.6;
+      }
+      
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Loading spinner cho lúc app chưa load xong */
+      .initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #1e3a8a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      
+      .initial-loader .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .initial-loader .loading-text {
+        color: white;
+        margin-top: 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; padding: 2rem; color: #dc2626;">
+        <h2>JavaScript Required</h2>
+        <p>Ứng dụng này yêu cầu JavaScript để hoạt động. Vui lòng bật JavaScript trong trình duyệt của bạn.</p>
+      </div>
+    </noscript>
+    
+    <!-- Loading screen hiển thị trong lúc React app đang load -->
+    <div id="initial-loader" class="initial-loader">
+      <div style="text-align: center;">
+        <div class="spinner"></div>
+        <div class="loading-text">Đang tải ứng dụng...</div>
+      </div>
+    </div>
+    
+    <!-- React app sẽ render vào đây -->
+    <div id="root"></div>
+    
+    <script>
+      // Ẩn loading screen khi React app đã render xong
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.style.opacity = '0';
+            loader.style.transition = 'opacity 0.5s ease';
+            setTimeout(function() {
+              loader.style.display = 'none';
+            }, 500);
+          }
+        }, 500);
+      });
+      
+      // Error handling cho lỗi JavaScript
+      window.addEventListener('error', function(e) {
+        console.error('JavaScript Error:', e.error);
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.innerHTML = `
+            <div style="text-align: center; color: white;">
+              <h2>Lỗi tải ứng dụng</h2>
+              <p>Đã xảy ra lỗi khi tải ứng dụng. Vui lòng thử lại.</p>
+              <button onclick="location.reload()" style="
+                background: white; 
+                color: #1e3a8a; 
+                border: none; 
+                padding: 0.75rem 1.5rem; 
+                border-radius: 0.5rem; 
+                cursor: pointer;
+                font-weight: 500;
+              ">
+                Tải lại trang
+              </button>
+            </div>
+          `;
+        }
+      });
+    </script>
+  </body>
+</html>
