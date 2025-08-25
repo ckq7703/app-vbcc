@@ -142,6 +142,21 @@ contract cert {
         return userCertificates[_student];
     }
 
+
+
+    // Lấy tất cả chứng chỉ (chỉ dành cho admin)
+    function getAllCertificates() public view onlyAdmin returns (Certificate[] memory) {
+        Certificate[] memory allCerts = new Certificate[](certificateIdCounter);
+        for (uint256 i = 1; i <= certificateIdCounter; i++) {
+            if (certificates[i].id != 0) {
+                allCerts[i - 1] = certificates[i];
+            }
+        }
+        return allCerts;
+    }
+
+
+    
     // Chuyển quyền admin (nếu cần)
     function transferAdmin(address _newAdmin) public onlyAdmin {
         require(_newAdmin != address(0), "Invalid address");

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import IssueCertificate from './components/IssueCertificate';
+import BulkIssueCertificate from './components/BulkIssueCertificate';
+
 import ViewCertificates from './components/ViewCertificates';
 import getWeb3 from './utils/web3Config';
 import CertificateList from './components/CertificateList';
@@ -83,6 +85,7 @@ function App() {
               {role === 'admin' && (
                 <>
                   <Route path="issue" element={<IssueCertificate />} />
+                  <Route path="issueimport" element={<BulkIssueCertificate />} />
                   <Route path="admin/certificates" element={<CertificateList />} />
                 </>
               )}

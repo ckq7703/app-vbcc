@@ -2,21 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Dialog } from '@headlessui/react';
-
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const CertificateVerificationPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isValid, setIsValid] = useState(null); // true | false
+  const [pdfLoaded, setPdfLoaded] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false); // trạng thái loading
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const ipfsHash = searchParams.get('ipfsHash');
 
   useEffect(() => {
+    let timer;
     const verifyCertificate = async () => {
       if (!ipfsHash) return;
 
+      setIsVerifying(true); // bắt đầu loading
       try {
         const response = await axios.get(
           `${API_BASE_URL}/verify?ipfsHash=${encodeURIComponent(ipfsHash)}`,
@@ -24,16 +28,24 @@ const CertificateVerificationPage = () => {
         );
 
         const { success } = response.data;
-        setIsValid(success); // true or false
-        setIsOpen(true); // Show modal
+        setIsValid(success);
       } catch (err) {
-        setIsValid(false); // default to false on error
+        setIsValid(false);
+      } finally {
+        setIsVerifying(false);
         setIsOpen(true);
       }
     };
 
-    verifyCertificate();
-  }, [ipfsHash]);
+    if (pdfLoaded) {
+      // Đợi 5 giây sau khi PDF load xong mới gọi API
+      timer = setTimeout(() => {
+        verifyCertificate();
+      }, 3000);
+    }
+
+    return () => clearTimeout(timer);
+  }, [ipfsHash, pdfLoaded]);
 
   if (!ipfsHash) {
     return <p style={styles.error}>Không tìm thấy ipfsHash trong URL</p>;
@@ -43,27 +55,35 @@ const CertificateVerificationPage = () => {
     <div style={styles.container}>
       <h2 style={styles.title}>Xác Minh Chứng Chỉ</h2>
 
-      {/* Show PDF in iframe */}
+      {/* PDF iframe */}
       <embed
         src={`${API_BASE_URL}/upload/cert/${ipfsHash}.pdf`}
         type="application/pdf"
         style={styles.iframe}
+        onLoad={() => setPdfLoaded(true)}
       />
 
+      {/* Loading Spinner */}
+      {isVerifying && (
+        <div style={styles.loadingBox}>
+          <Loader2 className="animate-spin" size={48} color="#2563eb" />
+          <p style={styles.loadingText}>Đang xác thực chứng chỉ...</p>
+        </div>
+      )}
 
-      {/* Modal thông báo kết quả */}
+      {/* Modal kết quả */}
       <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <div style={styles.dialogOverlay} aria-hidden="true" />
         <div style={styles.dialogPanel}>
           <Dialog.Panel style={styles.dialogBox}>
             {isValid === true ? (
               <>
-                <div style={styles.iconValid}>✔️</div>
+                <CheckCircle size={48} color="green" style={{ marginBottom: '1rem' }} />
                 <p style={styles.validText}>Chứng chỉ hợp lệ</p>
               </>
             ) : (
               <>
-                <div style={styles.iconInvalid}>❌</div>
+                <XCircle size={48} color="red" style={{ marginBottom: '1rem' }} />
                 <p style={styles.invalidText}>Chứng chỉ không hợp lệ</p>
               </>
             )}
@@ -99,6 +119,24 @@ const styles = {
     color: 'red',
     textAlign: 'center',
     marginTop: '2rem',
+  },
+    loadingBox: {
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    backgroundColor: '#fff',
+    padding: '1rem',
+    borderRadius: '10px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    zIndex: 1002,
+  },
+  loadingText: {
+    fontSize: '16px',
+    color: '#2563eb',
+    fontWeight: '500',
   },
   dialogOverlay: {
     position: 'fixed',

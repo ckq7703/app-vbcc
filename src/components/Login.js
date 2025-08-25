@@ -103,7 +103,7 @@ const Login = ({ onLogin }) => {
               />
             </div>
             
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+            <button type="submit" className="btn btn-primary d-flex justify-content-center align-items-center" style={{ width: '100%' }} disabled={loading}>
               {loading ? <span className="loading"></span> : null}
               Đăng nhập
             </button>

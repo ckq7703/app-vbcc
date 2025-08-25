@@ -184,14 +184,81 @@ app.post('/api/certificates', authenticateToken, upload.single('pdfFile'), async
 });
 
 // Thêm endpoint để lấy danh sách chứng chỉ
+// app.get('/api/certificates', authenticateToken, async (req, res) => {
+//   try {
+//     if (req.user.role !== 'admin') {
+//       return res.status(403).json({ success: false, message: 'Quyền truy cập bị từ chối. Chỉ admin mới được phép.' });
+//     }
+
+//     const [results] = await db.execute('SELECT * FROM tbl_certificates ORDER BY createdAt DESC');
+//     res.json(results);
+//   } catch (error) {
+//     console.error('Error fetching certificates:', error);
+//     res.status(500).json({ success: false, message: 'Lỗi máy chủ' });
+//   }
+// });
+
+// Thêm endpoint để lấy danh sách chứng chỉ (phân trang)
 app.get('/api/certificates', authenticateToken, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Quyền truy cập bị từ chối. Chỉ admin mới được phép.' });
+      return res.status(403).json({
+        success: false,
+        message: 'Quyền truy cập bị từ chối. Chỉ admin mới được phép.'
+      });
     }
 
-    const [results] = await db.execute('SELECT * FROM tbl_certificates ORDER BY createdAt DESC');
-    res.json(results);
+    // Lấy page, limit và các tham số filter từ query
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const { studentName, studentId, courseName, university } = req.query;
+
+    // Xây dựng câu truy vấn SQL với điều kiện filter
+    let query = 'SELECT * FROM tbl_certificates WHERE 1=1';
+    let countQuery = 'SELECT COUNT(*) as total FROM tbl_certificates WHERE 1=1';
+    const queryParams = [];
+
+    if (studentName) {
+      query += ' AND studentName LIKE ?';
+      countQuery += ' AND studentName LIKE ?';
+      queryParams.push(`%${studentName}%`);
+    }
+    if (studentId) {
+      query += ' AND studentId LIKE ?';
+      countQuery += ' AND studentId LIKE ?';
+      queryParams.push(`%${studentId}%`);
+    }
+    if (courseName) {
+      query += ' AND courseName LIKE ?';
+      countQuery += ' AND courseName LIKE ?';
+      queryParams.push(`%${courseName}%`);
+    }
+    if (university) {
+      query += ' AND university LIKE ?';
+      countQuery += ' AND university LIKE ?';
+      queryParams.push(`%${university}%`);
+    }
+
+    // Thêm sắp xếp và phân trang
+    query += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+    queryParams.push(limit, offset);
+
+    // Lấy tổng số bản ghi
+    const [countResult] = await db.execute(countQuery, queryParams.slice(0, queryParams.length - 2));
+    const totalItems = countResult[0].total;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Lấy dữ liệu trang hiện tại
+    const [results] = await db.execute(query, queryParams);
+
+    res.json({
+      success: true,
+      currentPage: page,
+      totalPages,
+      totalItems,
+      items: results
+    });
   } catch (error) {
     console.error('Error fetching certificates:', error);
     res.status(500).json({ success: false, message: 'Lỗi máy chủ' });

@@ -1,4 +1,4 @@
-/* Reset và Base Styles */
+Reset và Base Styles
 * {
   margin: 0;
   padding: 0;
@@ -34,9 +34,7 @@ body {
 
 /* Layout */
 .container {
-  /* max-width: none;
-  margin: 0 auto;
-  padding: 0 1rem; */
+
 }
 
 /* Modern Card Design */
@@ -140,6 +138,7 @@ body {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -332,7 +331,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   font-weight: 600;
