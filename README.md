@@ -48,9 +48,7 @@ npm install -g truffle
 # Kiểm tra version
 truffle version
 
-# Cài đặt các dependencies cho smart contract
-npm install @openzeppelin/contracts
-npm install @truffle/hdwallet-provider
+
 ```
 
 ### Bước 3: Cài đặt và cấu hình Ganache
